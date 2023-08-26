@@ -72,6 +72,7 @@ public abstract class Producto {
     public void removeQuantity(Integer quantityMinus){
         quantity -= quantityMinus;
     }
+    //attention: don't mistake this method with getCustomerPrice
     public Float productStockCost(){ return quantity*stockPrice; }
 
     @Override

@@ -5,6 +5,7 @@ public class ItemEnVenta {
     private Integer quantitySale;
     private Float itemBasePrice;
     private Float itemDiscount;
+    private Boolean itemImported;
 
     public ItemEnVenta(String idItemSale, Integer quantitySale) {
         this.idItemSale = idItemSale;
@@ -34,8 +35,15 @@ public class ItemEnVenta {
     public void setItemDiscount(Float itemDiscount) {
         this.itemDiscount = itemDiscount;
     }
-    //warning, only use this method when those attributes have set values
-    public Float getFinalPrice(){
-        return this.itemBasePrice * (1+this.itemDiscount);
+    public Boolean getItemImported() { return itemImported; }
+    public void setItemImported(Boolean itemImported) { this.itemImported = itemImported; }
+
+    //warning, only use these methods when those attributes have set values
+    public Float getPricePerUnit(){
+        if (this.itemImported)
+            return itemBasePrice*(1F-itemDiscount);
+        else
+            return itemBasePrice*(1.1F-itemDiscount);
     }
+    public Double getTotalOfPurchase(){ return this.getPricePerUnit().doubleValue() * quantitySale; }
 }

@@ -1,5 +1,7 @@
 package com.laTienda.tienda;
 
+import com.laTienda.producto.Bebida;
+import com.laTienda.producto.Envasado;
 import com.laTienda.producto.Producto;
 
 public class ItemTienda {
@@ -30,6 +32,7 @@ public class ItemTienda {
     public void activateItem() { storeItem.activateProduct(); }
     public Integer getQuantity(){ return storeItem.getQuantity(); }
     public Float getItemPriceOfSale(){ return storeItem.getCustomerPrice(); }
+    public Float getItemPriceOfSale(Float margin){ return this.getItemPriceOfSale() * margin; }
     public Float getItemPriceOfStock(){ return storeItem.getStockPrice(); }
     public Float getMarginOfEarning(){
         float a = getItemPriceOfSale() / getItemPriceOfStock() * 100;
@@ -49,7 +52,14 @@ public class ItemTienda {
     public Boolean itemEnvasado(){ return storeItem.isEnvasado(); }
     public Boolean itemLimpieza(){ return storeItem.isLimpieza(); }
     public static Boolean idValid(String id) { return !Producto.isOtro(id); }
-
+    public Boolean itemImported(){
+        boolean response = false;
+        if(storeItem.isEnvasado())
+            response = ((Envasado)storeItem).getImported();
+        if(storeItem.isBebida())
+            response = ((Bebida)storeItem).getImported();
+        return response;
+    }
     @Override
     public String toString() { return "Item: "+this.storeItem.toString(); }
 }

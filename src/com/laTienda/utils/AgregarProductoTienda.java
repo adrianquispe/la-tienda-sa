@@ -9,14 +9,14 @@ public interface AgregarProductoTienda{
      * normally used by buying orders
      * @param item
      */
-    void buyItemWithLogic(ItemTienda item);
+    void buyItemWithLogic(ItemTienda item, boolean logger);
 
     /**
      * unsafe, buy an item directly
      * logic of purchase should be applied beforehand
      * @param item
      */
-    void buyItemDirect(ItemTienda item);
+    void buyItemDirect(ItemTienda item, boolean logger);
     void addExistingItem(String idItem, Integer quantity);
     Boolean haveCashForPurchase(ItemTienda item);
     Boolean haveCashForPurchase(Float cost);

@@ -21,11 +21,11 @@ public class Main {
             operation = selectOperation();
             switch (operation){
                 case 1:
-                    buyByOrder(currentStore);
+                    buyByOrder(currentStore, true);
                     operationSelected = true;
                     break;
                 case 2:
-                    buyInteractive(currentStore);
+                    buyInteractive(currentStore, true);
                     operationSelected = true;
                     break;
                 case 3:
@@ -33,7 +33,7 @@ public class Main {
                     operationSelected = true;
                     break;
                 case 4:
-                    System.out.println("TODO");
+                    sellInteractive(currentStore, true);
                     operationSelected = true;
                     break;
                 case 5:
@@ -99,15 +99,15 @@ public class Main {
         System.out.println("(ATENCION - ELIJA UNA OPCION INGRESANDO NUMERO, CUALQUIER OTRO INGRESO TERMINARA EL PROGRAMA Y PERDERA LOS DATOS)");
         System.out.println("Por favor ingrese una opcion: ");
     }
-    public static void buyByOrder(Tienda thisShop){
+    public static void buyByOrder(Tienda thisShop, boolean logger){
         System.out.println(" --- 0 --- 0 --- ");
         System.out.println("Por favor ingrese los datos solicitados, el sistema mostrara si la operacion se concreto con exito o hubo algun evento inesperado");
-        thisShop.buyItemWithLogic(generateItemByConsole());
+        thisShop.buyItemWithLogic(generateItemByConsole(), logger);
     }
-    public static void buyByConsole(Tienda thisShop){
+    public static void buyByConsole(Tienda thisShop, boolean logger){
         System.out.println(" --- 0 --- 0 --- ");
         System.out.println("Por favor siga los pasos, e ingrese los datos de ser solicitados ");
-        buyInteractive(thisShop);
+        buyInteractive(thisShop, logger);
     }
     private static ItemTienda generateItemByConsole(){
         Producto aProduct = generateProductByConsole();
@@ -288,7 +288,7 @@ public class Main {
         return answer;
     }
 
-    private static void buyInteractive(Tienda store){
+    private static void buyInteractive(Tienda store, boolean logger){
         System.out.println(" - * - ");
         Scanner sc = new Scanner(System.in);
         String idItem;
@@ -340,7 +340,7 @@ public class Main {
                 if(imputYesNo()){
                     System.out.println("Se le rediccionara a la planilla de carga de nuevo item, una ves realizado se le confirmara la compra...");
                     currentItem = generateItemByConsole();
-                    store.buyItemDirect(currentItem);
+                    store.buyItemDirect(currentItem, logger);
                     System.out.println("Compra realizada! Gracias, vuelva pronto!");
                 }
                 else
@@ -356,10 +356,49 @@ public class Main {
         }
     }
 
+    private static void sellInteractive(Tienda store, boolean logger){
+
+    }
+
     private static void manageStore(){
-        /*Scanner sc = new Scanner(System.in);
-        do {
-            System.out.println("");
-        } while (false);*/
+        showOptionManageStore();
+        int opt;
+        boolean optSelected = false;
+        showOptionManageStore();
+        do{
+            opt = selectOperation();
+            switch (opt){
+                case 1:
+                    System.out.println("TODO");
+                    optSelected = true;
+                    break;
+                case 2:
+                    System.out.println("TODO");
+                    optSelected = true;
+                    break;
+                case 3:
+                    System.out.println("TODO");
+                    optSelected = true;
+                    break;
+                case 4:
+                    break;
+                case 9:
+                    showOptionManageStore();
+                default:
+                    System.out.println("Operacion invalida. (ingrese 9 si necesita ver las opciones)");
+            }
+            if(optSelected){
+                showOptionManageStore();
+                optSelected = false;
+            }
+        }while(opt != 0);
+    }
+    private static void showOptionManageStore(){
+        System.out.println(" - - - - - - - - - - ");
+        System.out.println("Ingrese opcion: ");
+        System.out.println(" 1- Mostrar datos de tienda");
+        System.out.println(" 2- Mostrar lista de productos");
+        System.out.println(" 3- Cambiar de tienda");
+        System.out.println(" 4- Volver al menu anterior");
     }
 }

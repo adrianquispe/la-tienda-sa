@@ -15,14 +15,14 @@ public class Tienda implements AgregarProductoTienda, VentaProductoTienda {
     private Integer stockMax;
     private Double cashOfStore;
     private HashMap<String, ItemTienda> products;
-    private Float cashOfSales;
+    private Double cashOfSales;
 
     public Tienda(String name, Integer stockMax, Double cashOfStore) {
         this.name = name;
         this.stockMax = stockMax;
         this.cashOfStore = cashOfStore;
         this.products = new HashMap<>();
-        this.cashOfSales = 0.0F;
+        this.cashOfSales = 0.0D;
     }
 
     public String getName() {
@@ -48,8 +48,8 @@ public class Tienda implements AgregarProductoTienda, VentaProductoTienda {
     public void removeCash(Float useCash){ cashOfStore -= useCash; }
     public ItemTienda getItem(String idItem){ return products.get(idItem); }
     public Producto getProduct(String idProduct){ return this.getItem(idProduct).getStoreItem(); }
-    public Float getCashOfSales() { return cashOfSales; }
-    public void cashASale(Float money){ this.cashOfSales += money; }
+    public Double getCashOfSales() { return cashOfSales; }
+    public void cashASale(Double money){ this.cashOfSales += money; }
     private void adquireMoreStockOf(String idProduct, Integer quantity){
         this.getItem(idProduct).addStockOfItem(quantity);
     }
@@ -62,7 +62,7 @@ public class Tienda implements AgregarProductoTienda, VentaProductoTienda {
     // ------- methods for purchase of stock ---------
 
     @Override
-    public void buyItemWithLogic(ItemTienda item) {
+    public void buyItemWithLogic(ItemTienda item, boolean logger) {
         System.out.println(" --------- ");
         System.out.println("Iniciando compra automatica");
         boolean buyConcreted;
@@ -93,7 +93,7 @@ public class Tienda implements AgregarProductoTienda, VentaProductoTienda {
         System.out.println(" --------- ");
     }
     @Override
-    public void buyItemDirect(ItemTienda item) {
+    public void buyItemDirect(ItemTienda item, boolean logger) {
         this.addNewProduct(item);
         this.removeCash(item.itemStockPrice());
     }
@@ -159,20 +159,40 @@ public class Tienda implements AgregarProductoTienda, VentaProductoTienda {
     public void saleItemWithLogic(ArrayList<ItemEnVenta> itemSaleList) {
      //TODO
     }
+
+    /**
+     * unsafe, make a sale of a product.
+     * logic should be applied beforehand
+     * @param itemSale
+     */
     @Override
     public void saleItemDirect(ItemEnVenta itemSale) {
         products.get(itemSale.getIdItemSale()).removeStockOfItem(itemSale.getQuantitySale());
-
+        this.cashASale(itemSale.getTotalOfPurchase());
     }
-    public void calculateCostOfSale(ItemEnVenta itemForSale){
+    public void calculateCostOfSale(ItemEnVenta itemForSale, boolean logger){
         ItemTienda itemOfStore = this.getItem(itemForSale.getIdItemSale());
         Float marginOfEarning = itemOfStore.getMarginOfEarning();
-        Float margOfEarnWithRestrictions = this.earningRestrictions(itemOfStore, marginOfEarning);
+        Float margOfEarnWithRestrictions = this.earningRestrictions(itemOfStore, marginOfEarning, logger);
         Float baseDiscounts = this.getDiscounts(itemOfStore);
-        Float discWithRestrictions = this.discountRestrictions(itemOfStore, baseDiscounts);
+        Float discWithRestrictions = this.discountRestrictions(itemOfStore, baseDiscounts, logger);
         Float marginAfterDiscount = itemOfStore.getMarginOfEarning(discWithRestrictions);
-        Float subTotal = itemOfStore.getItemPriceOfSale() * itemForSale.getQuantitySale();
-
+        if(marginAfterDiscount < 0){
+            itemForSale.setItemDiscount(0.0F);
+            if(logger)System.out.println("Lamentablemente el descuento a aplicar produce perdidas. No podra se aplicado.");
+        } else {
+            itemForSale.setItemDiscount(discWithRestrictions);
+            if(logger)System.out.println("El descuento ("+itemForSale.getItemDiscount()*100+"%) puede ser aplicado!");
+        }
+        if(marginOfEarning.equals(margOfEarnWithRestrictions)){
+            itemForSale.setItemBasePrice(itemOfStore.getItemPriceOfSale());
+        } else {
+            itemForSale.setItemBasePrice(itemOfStore.getItemPriceOfSale(margOfEarnWithRestrictions));
+        }
+        if (itemOfStore.itemImported()){
+            if(logger)System.out.println("El producto es importado, el precio incrementa un 10%");
+            itemForSale.setItemImported(itemOfStore.itemImported());
+        }
     }
     public Float getDiscounts(ItemTienda item){ //si tiene descuentos retorna su total o si no tiene 0.0f
         Float discounts = 0.0F;
@@ -184,47 +204,47 @@ public class Tienda implements AgregarProductoTienda, VentaProductoTienda {
         }
         return discounts;
     }
-    public Float earningRestrictions(ItemTienda itemStore, Float margin){
+    public Float earningRestrictions(ItemTienda itemStore, Float margin, boolean logger){
         Float marginWithRest = margin;
         if(itemStore.itemComestible()){
-            System.out.println("El item es un comestible, el margen de ganancia max es 20%");
+            if(logger)System.out.println("El item es un comestible, el margen de ganancia base max es 20%");
             marginWithRest = Math.max(margin, 0.2F);
         }
         if(itemStore.itemLimpieza()){
             Limpieza prodLimpieza = (Limpieza) itemStore.getStoreItem();
             UsoLimpieza useOfProdLimpieza = prodLimpieza.getUseType();
-            System.out.println("El item es de limpieza, el margen de ganancia max es 25%");
+            if(logger)System.out.println("El item es de limpieza, el margen de ganancia base max es 25%");
             marginWithRest = Math.max(margin, 0.25F);
             if(!(useOfProdLimpieza == UsoLimpieza.ROPA || useOfProdLimpieza == UsoLimpieza.MULTIUSO)){
-                System.out.println("El item de limpieza no es ropa ni multiuso, el margen de ganancia min es 10%");
+                if(logger)System.out.println("El item de limpieza no es ropa ni multiuso, el margen de ganancia base min es 10%");
                 marginWithRest = Math.min(marginWithRest, 0.1F);
             }
         }
         return marginWithRest;
     }
-    public Float discountRestrictions(ItemTienda itemStore, Float discount){
+    public Float discountRestrictions(ItemTienda itemStore, Float discount, boolean logger){
         Float discWithRest = discount;
         if(discount.equals(0.0F)){
-            System.out.println("No presenta descuento, no se calcula restricciones");
+            if(logger)System.out.println("No presenta descuento, no se calcula restricciones");
         } else{
             String idItem = itemStore.getIdProduct();
             GrupoProducto productGroup = GrupoDeProducto.typeOfProduct(idItem);
             switch(productGroup){
                 case BEBIDA:
-                    System.out.println("El item es bebida, no puede recibir mas de 15% de descuento");
+                    if(logger)System.out.println("El item es bebida, no puede recibir mas de 15% de descuento");
                     discWithRest = Math.min(discount, 0.15F);
                     break;
                 case ENVASE:
-                    System.out.println("El item es envase, no puede recibir mas de 20% de descuento");
+                    if(logger)System.out.println("El item es envase, no puede recibir mas de 20% de descuento");
                     discWithRest = Math.min(discount, 0.2F);
                     break;
                 case LIMPIEZA:
-                    System.out.println("El item es limpieza, no puede recibir mas de 25 de descuento");
+                    if(logger)System.out.println("El item es limpieza, no puede recibir mas de 25 de descuento");
                     discWithRest =  Math.min(discount, 0.25F);
                     break;
                 case OTRO:
             }
-            System.out.println("Se calculo un descuento de "+discWithRest*100+"%.");
+            if(logger)System.out.println("Se calculo un descuento de "+discWithRest*100+"%.");
         }
         return discWithRest;
     }

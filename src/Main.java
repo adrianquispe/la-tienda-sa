@@ -14,29 +14,42 @@ public class Main {
     public static void main(String[] args) {
         Tienda currentStore = welcome();
         //System.out.println(currentStore.toString());
+        boolean operationSelected = false;
         int operation;
+        showOperations();
         do{
             operation = selectOperation();
             switch (operation){
                 case 1:
                     buyByOrder(currentStore);
+                    operationSelected = true;
                     break;
                 case 2:
                     buyInteractive(currentStore);
+                    operationSelected = true;
                     break;
                 case 3:
                     System.out.println("TODO");
+                    operationSelected = true;
                     break;
                 case 4:
                     System.out.println("TODO");
+                    operationSelected = true;
                     break;
                 case 5:
-                    System.out.println("TODO");
+                    manageStore();
+                    operationSelected = true;
                     break;
+                case 9:
+                    showOperations();
                 case 0:
                     break;
                 default:
-                    System.out.println("Operacion invalida.");
+                    System.out.println("Operacion invalida. (ingrese 9 si necesita ver las opciones)");
+            }
+            if(operationSelected){
+                showOperations();
+                operationSelected = false;
             }
         }while(operation != 0);
         System.out.println("Gracias por su visita!");
@@ -71,18 +84,20 @@ public class Main {
     public static int selectOperation(){
         Scanner scOpt = new Scanner(System.in);
         int option;
+        option = scOpt.nextInt();
+        return option;
+    }
+    private static void showOperations(){
         System.out.println(" --- 0 --- 0 --- ");
         System.out.println("Operaciones disponibles:");
         System.out.println(" 1 - Compra de producto por Orden: carga los datos de la orden de compra y el sistema gestiona la transaccion");
         System.out.println(" 2 - Compra de producto interactiva: el sistema lo va guiando mientras hace la compra");
         System.out.println(" 3 - Venta de producto por Orden (-FUERA DE SERVICIO-)");
         System.out.println(" 4 - Venta de producto interactiva: realiza una venta en el momento ingresando id y cantidad");
-        System.out.println(" 5 - Mostrar productos en la tienda (-COMING SOON-)");
+        System.out.println(" 5 - Gestionar Tienda");
         System.out.println(" 0 - Salir");
         System.out.println("(ATENCION - ELIJA UNA OPCION INGRESANDO NUMERO, CUALQUIER OTRO INGRESO TERMINARA EL PROGRAMA Y PERDERA LOS DATOS)");
         System.out.println("Por favor ingrese una opcion: ");
-        option = scOpt.nextInt();
-        return option;
     }
     public static void buyByOrder(Tienda thisShop){
         System.out.println(" --- 0 --- 0 --- ");
@@ -338,9 +353,13 @@ public class Main {
                 System.out.println("No hay dinero suficiente, por favor ingrese otro monto o renueve el dinero de la tienda");
                 return;
             }
-
-
         }
+    }
 
+    private static void manageStore(){
+        /*Scanner sc = new Scanner(System.in);
+        do {
+            System.out.println("");
+        } while (false);*/
     }
 }

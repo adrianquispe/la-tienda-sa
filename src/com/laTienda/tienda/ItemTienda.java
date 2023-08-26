@@ -49,4 +49,7 @@ public class ItemTienda {
     public Boolean itemEnvasado(){ return storeItem.isEnvasado(); }
     public Boolean itemLimpieza(){ return storeItem.isLimpieza(); }
     public static Boolean idValid(String id) { return !Producto.isOtro(id); }
+
+    @Override
+    public String toString() { return "Item: "+this.storeItem.toString(); }
 }

@@ -53,7 +53,12 @@ public class Tienda implements AgregarProductoTienda, VentaProductoTienda {
     private void adquireMoreStockOf(String idProduct, Integer quantity){
         this.getItem(idProduct).addStockOfItem(quantity);
     }
-
+    public void showItemsStore() {
+        System.out.println("Hay "+products.size()+" productos en la tienda." );
+        for(ItemTienda items: products.values()){
+            System.out.println(items);
+        }
+    }
     // ------- methods for purchase of stock ---------
 
     @Override

@@ -65,6 +65,7 @@ public abstract class Producto {
         isForSale = forSale;
     }
     public void outOfStock(){ this.isForSale = false; }
+    public void activateProduct() { this.isForSale = true; }
     public void addQuantity(Integer quantityPlus){
         quantity += quantityPlus;
     }

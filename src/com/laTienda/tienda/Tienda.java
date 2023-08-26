@@ -104,6 +104,9 @@ public class Tienda implements AgregarProductoTienda, VentaProductoTienda {
     }
     @Override
     public Boolean haveCashForPurchase(Float cost) { return this.getCashOfStore() >= cost; }
+    public Boolean haveCashForPurchaseItem(Integer quantity, String item){
+        return this.getCashOfStore() >= products.get(item).getItemPriceOfStock() * quantity;
+    }
     @Override
     public Boolean haveEnoughSpace(ItemTienda item) {
         //System.out.println("//debug: espacio disponible: "+this.availableStockSpace());
@@ -111,7 +114,7 @@ public class Tienda implements AgregarProductoTienda, VentaProductoTienda {
     }
     @Override
     public Boolean haveEnoughSpace(Integer quantity) {
-        return quantity >= this.availableStockSpace();
+        return quantity <= this.availableStockSpace();
     }
     public Boolean itemIsInStore(String idItem) {
         return products.containsKey(idItem);
@@ -128,8 +131,10 @@ public class Tienda implements AgregarProductoTienda, VentaProductoTienda {
         String idOfProduct = newProduct.getIdProduct();
         Boolean itemInStore = this.itemIsInStore(idOfProduct);
         if(itemInStore){
+            ItemTienda itemFound = this.products.get(idOfProduct);
             System.out.println(" - El producto se encuentra en la tienda. Agregando stock...");
-            this.products.get(idOfProduct).addStockOfItem(newProduct.getQuantity());
+            itemFound.addStockOfItem(newProduct.getQuantity());
+            itemFound.activateItem();
         }
 
         else{
@@ -140,7 +145,9 @@ public class Tienda implements AgregarProductoTienda, VentaProductoTienda {
     private void addNewProduct(ItemTienda newProduct){
         this.products.put(newProduct.getIdProduct(), newProduct);
     }
-
+    public void removeCashFromPurchase(String id, Integer quantity){
+        removeCash(products.get(id).getItemPriceOfStock() * quantity);
+    }
     // --------- methods for sale of items of store ---------
 
     @Override

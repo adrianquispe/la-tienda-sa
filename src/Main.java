@@ -22,13 +22,16 @@ public class Main {
                     buyByOrder(currentStore);
                     break;
                 case 2:
-                    System.out.println("TODO");
+                    buyInteractive(currentStore);
                     break;
                 case 3:
+                    System.out.println("TODO");
                     break;
                 case 4:
+                    System.out.println("TODO");
                     break;
                 case 5:
+                    System.out.println("TODO");
                     break;
                 case 0:
                     break;
@@ -74,7 +77,7 @@ public class Main {
         System.out.println(" 2 - Compra de producto interactiva: el sistema lo va guiando mientras hace la compra");
         System.out.println(" 3 - Venta de producto por Orden (-FUERA DE SERVICIO-)");
         System.out.println(" 4 - Venta de producto interactiva: realiza una venta en el momento ingresando id y cantidad");
-        System.out.println(" 5 - Funcion proxima a implementar (-COMING SOON-)");
+        System.out.println(" 5 - Mostrar productos en la tienda (-COMING SOON-)");
         System.out.println(" 0 - Salir");
         System.out.println("(ATENCION - ELIJA UNA OPCION INGRESANDO NUMERO, CUALQUIER OTRO INGRESO TERMINARA EL PROGRAMA Y PERDERA LOS DATOS)");
         System.out.println("Por favor ingrese una opcion: ");
@@ -85,6 +88,11 @@ public class Main {
         System.out.println(" --- 0 --- 0 --- ");
         System.out.println("Por favor ingrese los datos solicitados, el sistema mostrara si la operacion se concreto con exito o hubo algun evento inesperado");
         thisShop.buyItemWithLogic(generateItemByConsole());
+    }
+    public static void buyByConsole(Tienda thisShop){
+        System.out.println(" --- 0 --- 0 --- ");
+        System.out.println("Por favor siga los pasos, e ingrese los datos de ser solicitados ");
+        buyInteractive(thisShop);
     }
     private static ItemTienda generateItemByConsole(){
         Producto aProduct = generateProductByConsole();
@@ -152,10 +160,10 @@ public class Main {
                 idProd = sc.nextLine().toUpperCase().substring(0,5);
                 prodGroup = GrupoDeProducto.typeOfProduct(idProd);
                 System.out.println(" - Se detecto un producto de tipo: "+prodGroup.toString());
-                if(Producto.isOtro(idProd))
-                    System.out.println(" - Id invalido - ");
-                else
+                if(ItemTienda.idValid(idProd))
                     idProdOk = true;
+                else
+                    System.out.println(" - Id invalido - ");
             }while(!idProdOk);
             System.out.println("Ingrese descripcion del producto: ");//if the product exist this is useless
             descProd = sc.nextLine();
@@ -263,5 +271,76 @@ public class Main {
 
         }while(!correctAnswer);
         return answer;
+    }
+
+    private static void buyInteractive(Tienda store){
+        System.out.println(" - * - ");
+        Scanner sc = new Scanner(System.in);
+        String idItem;
+        Integer buyQuantity;
+        Float costItem;
+        ItemTienda currentItem;
+        boolean idItemOk = false;
+        do {
+            System.out.println("Ingrese id del item (5 caracteres): [Atencion: ingrese correctamente este campo, de lo contrario el programa se detendra!]");
+            idItem = sc.nextLine().toUpperCase().substring(0,5);
+            if(ItemTienda.idValid(idItem))
+                idItemOk = true;
+            else
+                System.out.println(" - Id invalido - ");
+        }while(!idItemOk);
+        System.out.println("Ingrese la cantidad de compra: ");
+        buyQuantity = sc.nextInt();
+        System.out.println("Ingrese el precio del producto: (usar 'coma' de ser necesario)");
+        costItem = sc.nextFloat();
+        System.out.println(" - Chequeando datos ingresados - ");
+        if(store.itemIsInStore(idItem)){
+            currentItem = store.getItem(idItem);
+            System.out.println("Se encontro item!");
+            if(store.haveEnoughSpace(buyQuantity) && store.haveCashForPurchaseItem(buyQuantity, idItem)){
+                System.out.println("Hay espacio disponible para la compra!");
+                System.out.println("Hay saldo suficiente para la compra!");
+                System.out.println("Confirma la compra? (Y/N)");
+                if (imputYesNo()){
+                    currentItem.addStockOfItem(buyQuantity);
+                    store.removeCashFromPurchase(idItem, buyQuantity);
+                    System.out.println("Compra realizada! Gracias, vuelva pronto!");
+                }else{
+                    System.out.println("Vuelva pronto!");
+                }
+                return;
+            } else if(!store.haveEnoughSpace(buyQuantity)) {
+                System.out.println("No hay stock suficiente, por favor espere a que ingrese mas o intente otro monto");
+                return;
+            } else {
+                System.out.println("No hay dinero suficiente, por favor ingrese otro monto o renueve el dinero de la tienda");
+                return;
+            }
+        } else {
+            System.out.println("Producto no encontrado");
+            if(store.haveEnoughSpace(buyQuantity) && store.haveCashForPurchase(costItem*buyQuantity)){
+                System.out.println("Hay espacio disponible para la compra!");
+                System.out.println("Hay saldo suficiente para la compra!");
+                System.out.println("Desea agregar una compra del nuevo producto? (Y/N)");
+                if(imputYesNo()){
+                    System.out.println("Se le rediccionara a la planilla de carga de nuevo item, una ves realizado se le confirmara la compra...");
+                    currentItem = generateItemByConsole();
+                    store.buyItemDirect(currentItem);
+                    System.out.println("Compra realizada! Gracias, vuelva pronto!");
+                }
+                else
+                    System.out.println("Vuelva pronto!");
+            } else if(!store.haveEnoughSpace(buyQuantity)) {
+                //System.out.println(" debug - stock tienda: "+store.getStockMax()+" - stock producto: "+ buyQuantity);
+                System.out.println("No hay stock suficiente, por favor espere a que ingrese mas o intente otro monto");
+                return;
+            } else {
+                System.out.println("No hay dinero suficiente, por favor ingrese otro monto o renueve el dinero de la tienda");
+                return;
+            }
+
+
+        }
+
     }
 }

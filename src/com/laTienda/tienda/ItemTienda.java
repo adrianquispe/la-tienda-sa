@@ -27,6 +27,7 @@ public class ItemTienda {
     public void itemOutOfStock(){ storeItem.outOfStock(); }
     public void addStockOfItem(Integer quantity){ storeItem.addQuantity(quantity); }
     public void removeStockOfItem(Integer quantity){ storeItem.removeQuantity(quantity); }
+    public void activateItem() { storeItem.activateProduct(); }
     public Integer getQuantity(){ return storeItem.getQuantity(); }
     public Float getItemPriceOfSale(){ return storeItem.getCustomerPrice(); }
     public Float getItemPriceOfStock(){ return storeItem.getStockPrice(); }
@@ -47,4 +48,5 @@ public class ItemTienda {
     public Boolean itemBebida(){ return storeItem.isBebida(); }
     public Boolean itemEnvasado(){ return storeItem.isEnvasado(); }
     public Boolean itemLimpieza(){ return storeItem.isLimpieza(); }
+    public static Boolean idValid(String id) { return !Producto.isOtro(id); }
 }

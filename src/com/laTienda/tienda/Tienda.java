@@ -106,7 +106,7 @@ public class Tienda implements AgregarProductoTienda, VentaProductoTienda {
     public Boolean haveCashForPurchase(Float cost) { return this.getCashOfStore() >= cost; }
     @Override
     public Boolean haveEnoughSpace(ItemTienda item) {
-        System.out.println("//debug: espacio disponible: "+this.availableStockSpace());
+        //System.out.println("//debug: espacio disponible: "+this.availableStockSpace());
         return item.getStoreItem().getQuantity() <= this.availableStockSpace();
     }
     @Override

@@ -62,7 +62,7 @@ public class Main {
         String storeName;
         int stockMaxStore;
         double cashOfStore;
-        boolean imputOk = false;
+        boolean inputOk = false;
         Scanner sc = new Scanner(System.in);
         System.out.println("Bienvenido. Por favor ingrese los datos de su tienda ");
         do {
@@ -77,12 +77,12 @@ public class Main {
             System.out.println(" - Espacio maximo de tienda: "+stockMaxStore);
             System.out.printf(" - Dinero de tienda: %.2f\n",cashOfStore);
             System.out.println("Los datos son correctos?: (Y/N) ");//only proceeds when passing a "Y"
-            imputOk = imputYesNo();
-            if(imputOk)
+            inputOk = inputYesNo();
+            if(inputOk)
                 System.out.println("Felicidades, ya posee su tienda!");
             else
                 System.out.println("Por favor vuelva a ingresar los datos.");
-        } while(!imputOk);
+        } while(!inputOk);
         return new Tienda(storeName, stockMaxStore, cashOfStore);
     }
     public static int selectOperation(){
@@ -94,7 +94,7 @@ public class Main {
     private static void showOperations(){
         System.out.println(" --- 0 --- 0 --- ");
         System.out.println("Operaciones disponibles:");
-        System.out.println(" 1 - Compra de producto por Orden: carga los datos de la orden de compra y el sistema gestiona la transaccion");
+        System.out.println(" 1 - Compra de producto por Orden (Obsolete): carga los datos de la orden de compra y el sistema gestiona la transaccion");
         System.out.println(" 2 - Compra de producto interactiva: el sistema lo va guiando mientras hace la compra");
         System.out.println(" 3 - Venta de producto por Orden (-FUERA DE SERVICIO-)");
         System.out.println(" 4 - Venta de producto interactiva: realiza una venta en el momento ingresando id y cantidad");
@@ -116,8 +116,8 @@ public class Main {
     private static ItemTienda generateItemByConsole(){
         Producto aProduct = generateProductByConsole();
         ItemTienda anItem;
-        Boolean isEdible;
-        Boolean hasDiscounts;
+        boolean isEdible;
+        boolean hasDiscounts;
         Integer caloriesItem = null;
         int anioExp = 0;
         int mesExp = 0;
@@ -125,7 +125,7 @@ public class Main {
         Scanner sc = new Scanner(System.in);
         System.out.println("Datos adicionales (Los valores que ingrese debera confirmarlo consultando la lista de productos)");
         System.out.println("Es comestible? (Y/N)");
-        isEdible = imputYesNo();
+        isEdible = inputYesNo();
         if(isEdible){
             System.out.println("Ingrese las calorias del producto: ");
             caloriesItem = sc.nextInt();
@@ -137,7 +137,7 @@ public class Main {
             diaExp = sc.nextInt();
         }
         System.out.println("Tiene o tendra algun descuento? (Y/N)");
-        hasDiscounts = imputYesNo();
+        hasDiscounts = inputYesNo();
         if (hasDiscounts && isEdible){
             System.out.println(" - Aviso: la gestion de descuentos se hara fuera de esta operacion (agregado-borrado) - ");
             ItemTiendaComestibleConDescuento itemEdibleDisc = new ItemTiendaComestibleConDescuento(aProduct);
@@ -160,7 +160,7 @@ public class Main {
         return anItem;
     }
     private static Producto generateProductByConsole(){
-        System.out.println(" - Datos basicos del producto -");
+        //System.out.println(" - Datos basicos del producto -");
         Producto thisProduct = null;
         String idProd;
         String descProd;
@@ -215,24 +215,24 @@ public class Main {
                     creationProdBeforeConfirmationOk = true;
                     break;
                 case BEBIDA:
-                    Boolean alcoholicProd;
-                    Float alcoholLevel;
-                    Boolean importedProd;
+                    boolean alcoholicProd;
+                    float alcoholLevel;
+                    boolean importedProd;
                     System.out.println("Es alcoholica? : (Y/N)");
-                    alcoholicProd = imputYesNo();
+                    alcoholicProd = inputYesNo();
                     if(alcoholicProd){
                         System.out.println("Ingrese nivel de alcohol en %: (use 'coma' de ser necesario)");
                         alcoholLevel = sc.nextFloat();
                     } else
                         alcoholLevel = 0.0F;
                     System.out.println("Es importada? : (Y/N)");
-                    importedProd = imputYesNo();
+                    importedProd = inputYesNo();
                     thisProduct = new Bebida(idProd, descProd, quantityProd, customerPriceProd, stockPriceProd, alcoholicProd, alcoholLevel, importedProd);
                     creationProdBeforeConfirmationOk = true;
                     break;
                 case ENVASE:
                     Envase packTypeProd = null;
-                    Boolean importedPackProd;
+                    boolean importedPackProd;
                     int optionPack;
                     boolean packTypeOk=false;
                     do {
@@ -249,7 +249,7 @@ public class Main {
                             System.out.println(" - Valor ingresado invalido - ");
                     } while(!packTypeOk);
                     System.out.println("Es importado? : (Y/N)");
-                    importedPackProd = imputYesNo();
+                    importedPackProd = inputYesNo();
                     thisProduct = new Envasado(idProd, descProd, quantityProd, customerPriceProd, stockPriceProd, packTypeProd, importedPackProd);
                     creationProdBeforeConfirmationOk = true;
                     break;
@@ -260,7 +260,7 @@ public class Main {
                 System.out.println("Por favor confirme si los datos ingresados son correctos (Hay datos que no se pueden mostrar)");
                 System.out.println(thisProduct);
                 System.out.println("Los datos son correctos? (Y/N)");
-                creationProdOk = imputYesNo();
+                creationProdOk = inputYesNo();
                 if (!creationProdOk){
                     System.out.println("Por favor ingrese nuevamente los datos");
                     sc = new Scanner(System.in);
@@ -270,18 +270,18 @@ public class Main {
         return thisProduct;
     }
 
-    private static boolean imputYesNo(){
+    private static boolean inputYesNo(){
         Scanner sc = new Scanner(System.in);
         boolean correctAnswer = false;
-        String imput;
-        boolean answer = false;
+        String input;
+        Boolean answer = null;
         do{
-            imput = sc.nextLine().substring(0,1).toUpperCase();
-            if(imput.equals("Y")){
+            input = sc.nextLine().substring(0,1).toUpperCase();
+            if(input.equals("Y")){
                 answer = true;
                 correctAnswer = true;
             }
-            else if(imput.equals("N")){
+            else if(input.equals("N")){
                 answer = false;
                 correctAnswer = true;
             } else {
@@ -320,7 +320,7 @@ public class Main {
                 System.out.println("Hay espacio disponible para la compra!");
                 System.out.println("Hay saldo suficiente para la compra!");
                 System.out.println("Confirma la compra? (Y/N)");
-                if (imputYesNo()){
+                if (inputYesNo()){
                     currentItem.addStockOfItem(buyQuantity);
                     store.removeCashFromPurchase(idItem, buyQuantity);
                     System.out.println("Compra realizada! Gracias, vuelva pronto!");
@@ -338,11 +338,13 @@ public class Main {
                 System.out.println("Hay espacio disponible para la compra!");
                 System.out.println("Hay saldo suficiente para la compra!");
                 System.out.println("Desea agregar una compra del nuevo producto? (Y/N)");
-                if(imputYesNo()){
+                if(inputYesNo()){
                     System.out.println("Se le rediccionara a la planilla de carga de nuevo item, una ves realizado se le confirmara la compra...");
-                    System.out.println(" - ATENCION: VERRIFIQUE QUE LOS DATOS A INGRESAR SEAN LOS MISMOS QUE LOS INGRESADOS PREVIAMENTE -");
+                    System.out.println(" - ATENCION: VERIFIQUE QUE LOS DATOS A INGRESAR SEAN LOS MISMOS QUE LOS INGRESADOS PREVIAMENTE -");
                     currentItem = generateItemByConsole();
+                    //System.out.println("debug= item creado: "+ currentItem);
                     store.buyItemDirect(currentItem, logger);
+                    //System.out.println(" - debug= item en tienda: "+store.getItem(idItem));
                     System.out.println("Compra realizada! Gracias, vuelva pronto!");
                 }
                 else
@@ -364,23 +366,25 @@ public class Main {
                 " unidad/es, y solo puede adquirir hasta "+store.VENTAITEMMAX+" producto/s por sesion.");
         ArrayList<ItemEnVenta> itemSaleList = new ArrayList<>();
         showOptionsSaleCart();
+        boolean success = false;
         boolean exitSaleGestor = false;
         do {
             switch (selectOperation()){
                 case 1:
-                    addToCart(store, itemSaleList, true);
+                    success = addToCart(store, itemSaleList, true);
                     break;
                 case 2:
-                    System.out.println("Proximamente!");
+                    emptyCart(itemSaleList, true);
                     break;
                 case 3:
                     displayShopCart(store, itemSaleList);
                     break;
                 case 4:
+                    continueToPayment(store, itemSaleList, true);
                     exitSaleGestor = true;
                     break;
                 case 5:
-                    System.out.println("Compra cancelada!");
+                    System.out.println("Venta cancelada!");
                     exitSaleGestor = true;
                     break;
                 case 9:
@@ -389,22 +393,23 @@ public class Main {
                 default:
                     System.out.println("Ingreso invalido (ingrese 9 para ver las opciones)");
             }
+            if(!success) showOptionsSaleCart();
         } while (!exitSaleGestor);
     }
 
     private static void showOptionsSaleCart(){
         System.out.println("Ingrese operacion: ");
         System.out.println(" 1- Agregar item al carrito");
-        System.out.println(" 2- Quitar item del carrito");
+        System.out.println(" 2- Vaciar carrito");
         System.out.println(" 3- Mostrar carrito");
         System.out.println(" 4- Confirmar compra: procede al calculo de precio final");
         System.out.println(" 5- Cancelar compra (ojo - sin confirmacion)");
     }
 
-    private static void addToCart(Tienda shop, ArrayList<ItemEnVenta> itemList, boolean logger){
+    private static boolean addToCart(Tienda shop, ArrayList<ItemEnVenta> itemList, boolean logger){
         if(itemList.size()>=shop.VENTAITEMMAX){
             System.out.println("Lo sentimos, alcanzo el limite de items por sesion.");
-            return;
+            return false;
         }
         ItemEnVenta itemRequested = reciveOrderInteractive(shop, true);
         if(itemRequested == null){
@@ -412,25 +417,31 @@ public class Main {
         } else {
             itemList.add(itemRequested);
             System.out.println("Item agregado al carrito!");
+            return true;
         }
+        return false;
+    }
+    private static void emptyCart(ArrayList<ItemEnVenta> list, boolean logger){
+        list.clear();
+        if(logger)System.out.println("Lista vaciada!");
     }
 
     private static ItemEnVenta reciveOrderInteractive(Tienda store, boolean logger){
-        String imputId;
+        String inputId;
         Scanner sc = new Scanner(System.in);
-        boolean imputIdOk = false;
+        boolean inputIdOk = false;
         System.out.println("Ingrese id del producto que desee adquirir: ");
         do {
-            imputId = sc.nextLine();
-            if(store.itemIsInStore(imputId)){
+            inputId = sc.nextLine();
+            if(store.itemIsInStore(inputId)){
                 if(logger)System.out.println("Producto encontrado!");
-                imputIdOk = true;
+                inputIdOk = true;
             } else {
                 System.out.println("Proucto no encontrado, intentelo nuevamente. (si desea salir cancelar, ingrese 0)");
             }
 
-        } while (!imputIdOk && !imputId.equals("0"));
-        if(imputId.equals("0")) return null;
+        } while (!inputIdOk && !inputId.equals("0"));
+        if(inputId.equals("0")) return null;
         Integer quantityOfPurchase;
         boolean quantityOk = false;
         System.out.println("Ingrese cantidad de unidades a comprar: ");
@@ -445,9 +456,10 @@ public class Main {
             }
         } while (!quantityOfPurchase.equals(0) && !quantityOk);
         if(quantityOfPurchase.equals(0)) return null;
+        if(!store.canBePurchased(inputId, quantityOfPurchase, true)) return null;
         System.out.println("Confirma ingreso de compra de "+quantityOfPurchase+
-                " unidad/es del item '"+store.getItem(imputId).getName()+"'?");
-        return imputYesNo() ? (new ItemEnVenta(imputId, quantityOfPurchase)) : null;
+                " unidad/es del item '"+store.getItem(inputId).getName()+"'?");
+        return inputYesNo() ? (new ItemEnVenta(inputId, quantityOfPurchase)) : null;
     }
     private static void displayShopCart(Tienda store, ArrayList<ItemEnVenta> shopList){
         if(shopList.isEmpty())
@@ -461,28 +473,38 @@ public class Main {
     }
     public static void continueToPayment(Tienda shop, ArrayList<ItemEnVenta> itemList, boolean logger){
         if(itemList.isEmpty()){
-            System.out.println("Nada que hacer, el carrito esta vacio!");
+            System.out.println("Nada que hacer, el carrito esta vacio! (cerrando sesion)");
             return;
         }
         System.out.println("Se procedera con el calculo de precios, aguarde un instante...");
         System.out.println("    * * * * * * ");
         for(ItemEnVenta item : itemList){
-            System.out.println(" - - - - - ");
+            if(logger)System.out.println(" - - - - - ");
             shop.calculateCostOfSale(item, true);
         }
-        System.out.println(" - - - - - ");
+        if(logger)System.out.println(" - - - - - ");
         System.out.println("    * * * * * * ");
         confirmSale(shop, itemList, true);
     }
     private static void confirmSale(Tienda shop, ArrayList<ItemEnVenta> itemList, boolean logger){
-
-    }
-    private static String printFinalSaleItemDetail(ItemEnVenta itemSale, Tienda shop){
-        return itemSale.getIdItemSale()+" "+itemSale.getItemName(shop)+" "+itemSale.getQuantitySale()+" x "+
-                itemSale.getPricePerUnit();
+        Double totalOfSale = 0.0;
+        if(logger)System.out.println("Se procedera al pago de los siguientes items:");
+        for(ItemEnVenta item : itemList){
+            if(logger)System.out.println(" - "+item.getFinalSaleItemDetail(shop));
+            totalOfSale += item.getTotalOfPurchase();
+        }
+        System.out.println("Total de venta: "+totalOfSale);
+        System.out.println("Confirmar venta? (Y/N)");
+        if(inputYesNo()){
+            shop.saleItemListDirect(itemList);
+            System.out.println("Venta exitosa! gracias, vuelva pronto");
+        } else {
+            System.out.println("Venta cancelada! vuelva pronto");
+        }
     }
 
     private static void manageStore(Tienda store){  //option 5: manage store
+        boolean exitManager = false;
         boolean optSelected = false;
         showOptionManageStore();
         do{
@@ -492,29 +514,53 @@ public class Main {
                     optSelected = true;
                     break;
                 case 2:
-                    System.out.println("TODO");
+                    displayStoreItems(store);
                     optSelected = true;
                     break;
                 case 3:
-                    System.out.println("TODO");
+                    addDiscountItem(store, true);
                     optSelected = true;
                     break;
                 case 4:
+                    System.out.println("TODO!");
                     optSelected = true;
+                    break;
+                case 5:
+                    exitManager = true;
                     break;
                 case 9:
                     showOptionManageStore();
                 default:
                     System.out.println("Operacion invalida. (ingrese 9 si necesita ver las opciones)");
             }
-        }while(!optSelected);
+            if(optSelected){
+                showOptionManageStore();
+                optSelected = false;
+            }
+        }while(!exitManager);
     }
     private static void showOptionManageStore(){
         //System.out.println(" - - - - - - - - - - ");
         System.out.println("Ingrese opcion: ");
         System.out.println(" 1- Mostrar datos de tienda");
         System.out.println(" 2- Mostrar lista de productos");
-        System.out.println(" 3- Cambiar de tienda");
-        System.out.println(" 4- Volver al menu anterior");
+        System.out.println(" 3- Agregar descuento a item");
+        System.out.println(" 4- Cambiar de tienda (COMMING SOON)");
+        System.out.println(" 5- Volver al menu anterior");
+    }
+    private static void addDiscountItem(Tienda store, boolean logger){
+        Scanner sc = new Scanner(System.in);
+        String idProd;
+        System.out.println("Ingrese id del producto: ");
+        idProd = sc.nextLine();
+        if(store.itemIsInStore(idProd)){
+            store.addDiscountToItem(idProd, true);
+        } else {
+            System.out.println("El item no esta en la tienda o es incorrecto.");
+        }
+    }
+    private static void displayStoreItems(Tienda store){
+        System.out.println("Productos en la tienda: ");
+        System.out.println(store.getAllItems());
     }
 }

@@ -73,7 +73,7 @@ public abstract class Producto {
         quantity -= quantityMinus;
     }
     //attention: don't mistake this method with getCustomerPrice
-    public Float productStockCost(){ return quantity*stockPrice; }
+    public Double productStockCost(){ return quantity*stockPrice.doubleValue(); }
 
     @Override
     public String toString() {

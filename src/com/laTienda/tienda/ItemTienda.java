@@ -25,8 +25,8 @@ public class ItemTienda {
     public String getIdProduct(){
         return storeItem.getId();
     }
-    public Float itemStockPrice(){ return this.storeItem.productStockCost(); }
-    public Boolean itemIsForSale(){ return storeItem.getForSale(); }
+    public Double itemStockPrice(){ return storeItem.productStockCost(); }
+    public Boolean isForSale(){ return storeItem.getForSale(); }
     public void itemOutOfStock(){ storeItem.outOfStock(); }
     public void addStockOfItem(Integer quantity){ storeItem.addQuantity(quantity); }
     public void removeStockOfItem(Integer quantity){ storeItem.removeQuantity(quantity); }

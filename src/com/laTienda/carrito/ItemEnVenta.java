@@ -54,4 +54,8 @@ public class ItemEnVenta {
             return itemBasePrice*(1.1F-itemDiscount);
     }
     public Double getTotalOfPurchase(){ return this.getPricePerUnit().doubleValue() * quantitySale; }
+    public String getFinalSaleItemDetail(Tienda shop){
+        return this.getIdItemSale()+" "+this.getItemName(shop)+" "+this.getQuantitySale()+" x "+
+                this.getPricePerUnit();
+    }
 }

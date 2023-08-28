@@ -1,12 +1,14 @@
 package com.laTienda.tienda;
 
 import com.laTienda.carrito.ItemEnVenta;
+import com.laTienda.descuentos.TipoDescuentoItem;
 import com.laTienda.producto.Limpieza;
 import com.laTienda.producto.Producto;
 import com.laTienda.utils.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Scanner;
 
 public class Tienda implements AgregarProductoTienda, VentaProductoTienda {
     public final Integer VENTAITEMMAX = 3;
@@ -45,7 +47,7 @@ public class Tienda implements AgregarProductoTienda, VentaProductoTienda {
     }
     public HashMap<String, ItemTienda> getProducts() { return products; }
     public void addCash(Float moreCash){ cashOfStore += moreCash; }
-    public void removeCash(Float useCash){ cashOfStore -= useCash; }
+    public void removeCash(Double useCash){ cashOfStore -= useCash; }
     public ItemTienda getItem(String idItem){ return products.get(idItem); }
     public Producto getProduct(String idProduct){ return this.getItem(idProduct).getStoreItem(); }
     public Double getCashOfSales(){ return cashOfSales; }
@@ -65,6 +67,31 @@ public class Tienda implements AgregarProductoTienda, VentaProductoTienda {
         Long var2 = Math.round(var);
         return var2.floatValue() / 100;
     }
+    public void addDiscountToItem(String idItem, boolean logger){ //applied by console input (interactive)
+        ItemTienda targetItem = getItem(idItem);
+        Scanner sc = new Scanner(System.in);
+        if(targetItem.itemConDescuento()){
+            System.out.println("Descuentos de tienda disponibles: ");
+            TipoDescuentoItem discList[] = TipoDescuentoItem.values();
+            int pos = 0;
+            if(logger){
+                for(TipoDescuentoItem discount : discList){ //if used again in the future, will make this as a method
+                    pos++;
+                    System.out.println(" "+pos+"- "+discount);
+                }
+            }
+            System.out.println("Ingrese descuento a agregar al item: ");
+            pos = sc.nextInt();
+            if(pos>0 && pos<=discList.length){
+                ((ItemTiendaConDescuento)targetItem).addDiscount(discList[pos]);
+                System.out.println("Se agrego el descuento '"+discList[pos-1]+"' al item!");
+            }else
+                System.out.println("Descuento invalido. Abortando operacion.");
+        } else {
+            if(logger) System.out.println("El item no acepta descuentos.");
+        }
+    }
+
     // ------- methods for purchase of stock ---------
 
     @Override
@@ -101,9 +128,15 @@ public class Tienda implements AgregarProductoTienda, VentaProductoTienda {
     @Override
     public void buyItemDirect(ItemTienda item, boolean logger) {
         this.addNewProduct(item);
+        //System.out.println("   debug= flag1");
         this.removeCash(item.itemStockPrice());
+        //System.out.println("  debug= producto en tienda: "+item.getName()+" - "+this.getItem(item.getIdProduct()));
+        //System.out.println("  debug= cantidad de items en tienda: ");
     }
-
+    private void addNewProduct(ItemTienda newProduct){
+        //System.out.println(" debug= se agrego producto: "+newProduct);
+        this.products.put(newProduct.getIdProduct(), newProduct);
+    }
     @Override
     public void addExistingItem(String idItem, Integer quantity) {
         this.getProduct(idItem).addQuantity(quantity);
@@ -153,11 +186,8 @@ public class Tienda implements AgregarProductoTienda, VentaProductoTienda {
             this.addNewProduct(newProduct);
         }
     }
-    private void addNewProduct(ItemTienda newProduct){
-        this.products.put(newProduct.getIdProduct(), newProduct);
-    }
     public void removeCashFromPurchase(String id, Integer quantity){
-        removeCash(products.get(id).getItemPriceOfStock() * quantity);
+        removeCash(products.get(id).getItemPriceOfStock().doubleValue() * quantity);
     }
     // --------- methods for sale of items of store ---------
 
@@ -175,6 +205,9 @@ public class Tienda implements AgregarProductoTienda, VentaProductoTienda {
     public void saleItemDirect(ItemEnVenta itemSale) {
         products.get(itemSale.getIdItemSale()).removeStockOfItem(itemSale.getQuantitySale());
         this.cashASale(itemSale.getTotalOfPurchase());
+    }
+    public void saleItemListDirect(ArrayList<ItemEnVenta> itemList){
+        itemList.forEach(itemEnVenta -> {this.saleItemDirect(itemEnVenta);});
     }
     public void calculateCostOfSale(ItemEnVenta itemForSale, boolean logger){
         ItemTienda itemOfStore = this.getItem(itemForSale.getIdItemSale());
@@ -254,14 +287,43 @@ public class Tienda implements AgregarProductoTienda, VentaProductoTienda {
         }
         return discWithRest;
     }
-    //public Float finalPriceItem()
 
+    //must verify item existence before using this method
+    public boolean canBePurchased(String idItem, Integer quantity, boolean logger){
+        ItemTienda targetItem = products.get(idItem);
+        if(targetItem.isForSale()){
+            if(logger) System.out.println("Item disponible.");
+            if(quantity<targetItem.getQuantity()){
+                if(logger) System.out.println("Cantidad disponible");
+                System.out.println(" - Atencion!: por favor no vuelva a ingresar el mismo producto al carrito, " +
+                        "podria ocacionar venta de producto sin stock!");
+                System.out.println(" - Si desea agregar mayor cantidad a un producto de su carrito, borrelo y vuelva a " +
+                        "agregarlo a su carrito con la cantidad deseada");
+                System.out.println(" < - to be fixed in next patch! - >");
+                return true;
+            } else{
+                if(logger) System.out.println("Lo sentimos, no hay suficiente stock del producto en la tienda." +
+                        " Intentelo nuevamente con un monto menor");
+            }
+        } else {
+            if(logger) System.out.println("Item no disponible para la venta");
+        }
+        return false;
+    }
 
+    // -----------
+
+    public String getAllItems(){
+        String[] listOfItems = {""};
+        products.values().forEach(itemTienda -> {listOfItems[0] += " -"+itemTienda.toString()+"\n";});
+        return listOfItems[0];
+    }
     @Override
     public String toString() {
         return " ---------- "+
                 " \nTienda: " + name +
-                " \n - Tamaño de almacenamiento maximo=" + stockMax +
+                " \n - Tamaño de almacenamiento maximo: " + stockMax +
+                " \n - Espacio de almacen ocupado: "+this.showUsedSpaceInPercent()+"%"+
                 " \n - Saldo de tienda: " + cashOfStore +
                 " \n - Saldo de ventas: " + cashOfSales +
                 " \n ---------- ";

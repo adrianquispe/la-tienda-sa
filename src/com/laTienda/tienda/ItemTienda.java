@@ -18,6 +18,7 @@ public class ItemTienda {
     public void setStoreItem(Producto storeItem) {
         this.storeItem = storeItem;
     }
+    public String getName(){ return storeItem.getDescription(); }
     public Float priceForSale(){
         return storeItem.getCustomerPrice();
     }
@@ -35,15 +36,13 @@ public class ItemTienda {
     public Float getItemPriceOfSale(Float margin){ return this.getItemPriceOfSale() * margin; }
     public Float getItemPriceOfStock(){ return storeItem.getStockPrice(); }
     public Float getMarginOfEarning(){
-        float a = getItemPriceOfSale() / getItemPriceOfStock() * 100;
-        Integer b = Math.round(a);
-        return (b.floatValue() / 100) - 1;
+        double a = getItemPriceOfSale().doubleValue() / getItemPriceOfStock() * 10000;
+        Long b = Math.round(a);
+        return (b.floatValue() / 10000) - 1;
     }
     //devuelve el margen aplicando descuento por parametro
     public Float getMarginOfEarning(Float discount){
-        float a = (getItemPriceOfSale() * (1-discount)) / getItemPriceOfStock() * 100;
-        Integer b = Math.round(a);
-        return (b.floatValue() / 100) - 1;
+        return ( ( getMarginOfEarning()+1 ) * (1-discount) ) -1;
     }
     public Boolean itemConDescuento(){ return this instanceof ItemTiendaConDescuento; }
     public Boolean itemComestible(){ return this instanceof ItemTiendaComestible; }

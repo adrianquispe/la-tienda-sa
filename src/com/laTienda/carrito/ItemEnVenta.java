@@ -1,5 +1,7 @@
 package com.laTienda.carrito;
 
+import com.laTienda.tienda.Tienda;
+
 public class ItemEnVenta {
     private String idItemSale;
     private Integer quantitySale;
@@ -37,8 +39,14 @@ public class ItemEnVenta {
     }
     public Boolean getItemImported() { return itemImported; }
     public void setItemImported(Boolean itemImported) { this.itemImported = itemImported; }
+    public String getItemName(Tienda shop){
+        return shop.getItemName(this.idItemSale);
+    }
+    public String basicSaleData(Tienda shop){
+        return  this.getItemName(shop) + " (x"+this.quantitySale+")";
+    }
 
-    //warning, only use these methods when those attributes have set values
+    //WARNING: only use these methods when all attributes have been set
     public Float getPricePerUnit(){
         if (this.itemImported)
             return itemBasePrice*(1F-itemDiscount);

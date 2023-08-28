@@ -1,3 +1,4 @@
+import com.laTienda.carrito.ItemEnVenta;
 import com.laTienda.producto.Bebida;
 import com.laTienda.producto.Envasado;
 import com.laTienda.producto.Limpieza;
@@ -8,6 +9,8 @@ import com.laTienda.utils.GrupoDeProducto;
 import com.laTienda.utils.GrupoProducto;
 import com.laTienda.utils.UsoLimpieza;
 
+import java.time.temporal.ValueRange;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Main {
@@ -25,7 +28,7 @@ public class Main {
                     operationSelected = true;
                     break;
                 case 2:
-                    buyInteractive(currentStore, true);
+                    buyByConsole(currentStore, true);
                     operationSelected = true;
                     break;
                 case 3:
@@ -37,11 +40,12 @@ public class Main {
                     operationSelected = true;
                     break;
                 case 5:
-                    manageStore();
+                    manageStore(currentStore);
                     operationSelected = true;
                     break;
                 case 9:
                     showOperations();
+                    break;
                 case 0:
                     break;
                 default:
@@ -306,7 +310,7 @@ public class Main {
         }while(!idItemOk);
         System.out.println("Ingrese la cantidad de compra: ");
         buyQuantity = sc.nextInt();
-        System.out.println("Ingrese el precio del producto: (usar 'coma' de ser necesario)");
+        System.out.println("Ingrese el precio por unidad del producto: (usar 'coma' de ser necesario)");
         costItem = sc.nextFloat();
         System.out.println(" - Chequeando datos ingresados - ");
         if(store.itemIsInStore(idItem)){
@@ -323,13 +327,10 @@ public class Main {
                 }else{
                     System.out.println("Vuelva pronto!");
                 }
-                return;
             } else if(!store.haveEnoughSpace(buyQuantity)) {
-                System.out.println("No hay stock suficiente, por favor espere a que ingrese mas o intente otro monto");
-                return;
+                System.out.println("No hay espacio en tienda suficiente, por favor libere espacio en tienda o ingrese menor cantidad");
             } else {
-                System.out.println("No hay dinero suficiente, por favor ingrese otro monto o renueve el dinero de la tienda");
-                return;
+                System.out.println("No hay dinero en tienda suficiente, por favor ingrese otro monto o renueve el dinero de la tienda");
             }
         } else {
             System.out.println("Producto no encontrado");
@@ -339,6 +340,7 @@ public class Main {
                 System.out.println("Desea agregar una compra del nuevo producto? (Y/N)");
                 if(imputYesNo()){
                     System.out.println("Se le rediccionara a la planilla de carga de nuevo item, una ves realizado se le confirmara la compra...");
+                    System.out.println(" - ATENCION: VERRIFIQUE QUE LOS DATOS A INGRESAR SEAN LOS MISMOS QUE LOS INGRESADOS PREVIAMENTE -");
                     currentItem = generateItemByConsole();
                     store.buyItemDirect(currentItem, logger);
                     System.out.println("Compra realizada! Gracias, vuelva pronto!");
@@ -347,29 +349,146 @@ public class Main {
                     System.out.println("Vuelva pronto!");
             } else if(!store.haveEnoughSpace(buyQuantity)) {
                 //System.out.println(" debug - stock tienda: "+store.getStockMax()+" - stock producto: "+ buyQuantity);
-                System.out.println("No hay stock suficiente, por favor espere a que ingrese mas o intente otro monto");
-                return;
+                System.out.println("No hay espacio en tienda suficiente, por favor libere espacio en tienda o ingrese menor cantidad");
             } else {
-                System.out.println("No hay dinero suficiente, por favor ingrese otro monto o renueve el dinero de la tienda");
-                return;
+                System.out.println("No hay dinero en tienda suficiente, por favor ingrese otro monto o renueve el dinero de la tienda");
             }
         }
     }
 
     private static void sellInteractive(Tienda store, boolean logger){
-
+        System.out.println(" - * - ");
+        System.out.println("Bienvenido al gestor de ventas interactivo.");
+        System.out.println(" - < Info: designed as a shopping cart > - "); //debug message
+        System.out.println("Se le notifica que el limite de cantidad por producto es de "+store.UNIDADESXITEMMAX+
+                " unidad/es, y solo puede adquirir hasta "+store.VENTAITEMMAX+" producto/s por sesion.");
+        ArrayList<ItemEnVenta> itemSaleList = new ArrayList<>();
+        showOptionsSaleCart();
+        boolean exitSaleGestor = false;
+        do {
+            switch (selectOperation()){
+                case 1:
+                    addToCart(store, itemSaleList, true);
+                    break;
+                case 2:
+                    System.out.println("Proximamente!");
+                    break;
+                case 3:
+                    displayShopCart(store, itemSaleList);
+                    break;
+                case 4:
+                    exitSaleGestor = true;
+                    break;
+                case 5:
+                    System.out.println("Compra cancelada!");
+                    exitSaleGestor = true;
+                    break;
+                case 9:
+                    showOptionsSaleCart();
+                    break;
+                default:
+                    System.out.println("Ingreso invalido (ingrese 9 para ver las opciones)");
+            }
+        } while (!exitSaleGestor);
     }
 
-    private static void manageStore(){
-        showOptionManageStore();
-        int opt;
+    private static void showOptionsSaleCart(){
+        System.out.println("Ingrese operacion: ");
+        System.out.println(" 1- Agregar item al carrito");
+        System.out.println(" 2- Quitar item del carrito");
+        System.out.println(" 3- Mostrar carrito");
+        System.out.println(" 4- Confirmar compra: procede al calculo de precio final");
+        System.out.println(" 5- Cancelar compra (ojo - sin confirmacion)");
+    }
+
+    private static void addToCart(Tienda shop, ArrayList<ItemEnVenta> itemList, boolean logger){
+        if(itemList.size()>=shop.VENTAITEMMAX){
+            System.out.println("Lo sentimos, alcanzo el limite de items por sesion.");
+            return;
+        }
+        ItemEnVenta itemRequested = reciveOrderInteractive(shop, true);
+        if(itemRequested == null){
+            System.out.println("Operacion cancelada!");
+        } else {
+            itemList.add(itemRequested);
+            System.out.println("Item agregado al carrito!");
+        }
+    }
+
+    private static ItemEnVenta reciveOrderInteractive(Tienda store, boolean logger){
+        String imputId;
+        Scanner sc = new Scanner(System.in);
+        boolean imputIdOk = false;
+        System.out.println("Ingrese id del producto que desee adquirir: ");
+        do {
+            imputId = sc.nextLine();
+            if(store.itemIsInStore(imputId)){
+                if(logger)System.out.println("Producto encontrado!");
+                imputIdOk = true;
+            } else {
+                System.out.println("Proucto no encontrado, intentelo nuevamente. (si desea salir cancelar, ingrese 0)");
+            }
+
+        } while (!imputIdOk && !imputId.equals("0"));
+        if(imputId.equals("0")) return null;
+        Integer quantityOfPurchase;
+        boolean quantityOk = false;
+        System.out.println("Ingrese cantidad de unidades a comprar: ");
+        do {
+            quantityOfPurchase = sc.nextInt();
+            if(ValueRange.of(0, store.UNIDADESXITEMMAX).isValidValue(quantityOfPurchase)){
+                quantityOk = true;
+            } else {
+                System.out.println("Cantidad de items invalido, por favor recuerde que el limite es "+
+                        store.UNIDADESXITEMMAX+" por producto");
+                System.out.println("Reingrese cantidad: (si desea cancelar, ingrese 0)");
+            }
+        } while (!quantityOfPurchase.equals(0) && !quantityOk);
+        if(quantityOfPurchase.equals(0)) return null;
+        System.out.println("Confirma ingreso de compra de "+quantityOfPurchase+
+                " unidad/es del item '"+store.getItem(imputId).getName()+"'?");
+        return imputYesNo() ? (new ItemEnVenta(imputId, quantityOfPurchase)) : null;
+    }
+    private static void displayShopCart(Tienda store, ArrayList<ItemEnVenta> shopList){
+        if(shopList.isEmpty())
+            System.out.println("Su carrito esta vacio!");
+        else {
+            System.out.println("Su carrito contiene los siguientes productos: ");
+            for(ItemEnVenta item : shopList){
+                System.out.println(" - "+item.basicSaleData(store));
+            }
+        }
+    }
+    public static void continueToPayment(Tienda shop, ArrayList<ItemEnVenta> itemList, boolean logger){
+        if(itemList.isEmpty()){
+            System.out.println("Nada que hacer, el carrito esta vacio!");
+            return;
+        }
+        System.out.println("Se procedera con el calculo de precios, aguarde un instante...");
+        System.out.println("    * * * * * * ");
+        for(ItemEnVenta item : itemList){
+            System.out.println(" - - - - - ");
+            shop.calculateCostOfSale(item, true);
+        }
+        System.out.println(" - - - - - ");
+        System.out.println("    * * * * * * ");
+        confirmSale(shop, itemList, true);
+    }
+    private static void confirmSale(Tienda shop, ArrayList<ItemEnVenta> itemList, boolean logger){
+
+    }
+    private static String printFinalSaleItemDetail(ItemEnVenta itemSale, Tienda shop){
+        return itemSale.getIdItemSale()+" "+itemSale.getItemName(shop)+" "+itemSale.getQuantitySale()+" x "+
+                itemSale.getPricePerUnit();
+    }
+
+    private static void manageStore(Tienda store){  //option 5: manage store
         boolean optSelected = false;
         showOptionManageStore();
         do{
-            opt = selectOperation();
-            switch (opt){
+            switch (selectOperation()){
                 case 1:
-                    System.out.println("TODO");
+                    System.out.println(store);
                     optSelected = true;
                     break;
                 case 2:
@@ -381,20 +500,17 @@ public class Main {
                     optSelected = true;
                     break;
                 case 4:
+                    optSelected = true;
                     break;
                 case 9:
                     showOptionManageStore();
                 default:
                     System.out.println("Operacion invalida. (ingrese 9 si necesita ver las opciones)");
             }
-            if(optSelected){
-                showOptionManageStore();
-                optSelected = false;
-            }
-        }while(opt != 0);
+        }while(!optSelected);
     }
     private static void showOptionManageStore(){
-        System.out.println(" - - - - - - - - - - ");
+        //System.out.println(" - - - - - - - - - - ");
         System.out.println("Ingrese opcion: ");
         System.out.println(" 1- Mostrar datos de tienda");
         System.out.println(" 2- Mostrar lista de productos");

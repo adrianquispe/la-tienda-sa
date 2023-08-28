@@ -9,8 +9,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class Tienda implements AgregarProductoTienda, VentaProductoTienda {
-    private static final Integer VENTAITEMMAX = 3;
-    private static final Integer UNIDADESMAX = 10;
+    public final Integer VENTAITEMMAX = 3;
+    public final Integer UNIDADESXITEMMAX = 10;
     private String name;
     private Integer stockMax;
     private Double cashOfStore;
@@ -48,7 +48,8 @@ public class Tienda implements AgregarProductoTienda, VentaProductoTienda {
     public void removeCash(Float useCash){ cashOfStore -= useCash; }
     public ItemTienda getItem(String idItem){ return products.get(idItem); }
     public Producto getProduct(String idProduct){ return this.getItem(idProduct).getStoreItem(); }
-    public Double getCashOfSales() { return cashOfSales; }
+    public Double getCashOfSales(){ return cashOfSales; }
+    public String getItemName(String id){ return this.getItem(id).getName(); }
     public void cashASale(Double money){ this.cashOfSales += money; }
     private void adquireMoreStockOf(String idProduct, Integer quantity){
         this.getItem(idProduct).addStockOfItem(quantity);
@@ -58,6 +59,11 @@ public class Tienda implements AgregarProductoTienda, VentaProductoTienda {
         for(ItemTienda items: products.values()){
             System.out.println(items);
         }
+    }
+    public Float showUsedSpaceInPercent(){
+        Double var = (this.totalStockQuantity().doubleValue() / stockMax) * 10000;
+        Long var2 = Math.round(var);
+        return var2.floatValue() / 100;
     }
     // ------- methods for purchase of stock ---------
 
@@ -70,7 +76,7 @@ public class Tienda implements AgregarProductoTienda, VentaProductoTienda {
             System.out.println(" - Hay saldo suficiente para la compra");
             if(haveEnoughSpace(item)){
                 System.out.println(" - Hay espacio suficiente para la compra");
-                this.addProduct(item);
+                this.addProduct(item , logger);
                 System.out.println(" - Actualizando saldo de la tienda...");
                 this.removeCash(item.itemStockPrice());
                 buyConcreted = true;
@@ -132,18 +138,18 @@ public class Tienda implements AgregarProductoTienda, VentaProductoTienda {
         this.getProducts().forEach((id, item) -> totalQuantity[0] += item.getQuantity());
         return totalQuantity[0];
     }
-    private void addProduct(ItemTienda newProduct){
+    private void addProduct(ItemTienda newProduct, boolean logger){
         String idOfProduct = newProduct.getIdProduct();
         Boolean itemInStore = this.itemIsInStore(idOfProduct);
         if(itemInStore){
             ItemTienda itemFound = this.products.get(idOfProduct);
-            System.out.println(" - El producto se encuentra en la tienda. Agregando stock...");
+            if(logger)System.out.println(" - El producto se encuentra en la tienda. Agregando stock...");
             itemFound.addStockOfItem(newProduct.getQuantity());
             itemFound.activateItem();
         }
 
         else{
-            System.out.println(" - El producto es nuevo. Agregando a la tienda...");
+            if(logger)System.out.println(" - El producto es nuevo. Agregando a la tienda...");
             this.addNewProduct(newProduct);
         }
     }
@@ -253,11 +259,11 @@ public class Tienda implements AgregarProductoTienda, VentaProductoTienda {
 
     @Override
     public String toString() {
-        return "Tienda{" +
-                "name='" + name + '\'' +
-                ", stockMax=" + stockMax +
-                ", cashOfStore=" + cashOfStore +
-                ", cashOfSales=" + cashOfSales +
-                '}';
+        return " ---------- "+
+                " \nTienda: " + name +
+                " \n - Tamaño de almacenamiento maximo=" + stockMax +
+                " \n - Saldo de tienda: " + cashOfStore +
+                " \n - Saldo de ventas: " + cashOfSales +
+                " \n ---------- ";
     }
 }

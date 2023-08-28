@@ -7,6 +7,7 @@ import com.laTienda.producto.Producto;
 import com.laTienda.utils.*;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Scanner;
 
@@ -318,6 +319,21 @@ public class Tienda implements AgregarProductoTienda, VentaProductoTienda {
         products.values().forEach(itemTienda -> {listOfItems[0] += " -"+itemTienda.toString()+"\n";});
         return listOfItems[0];
     }
+
+    //OPERACIONES  DE LA PARTE III DEL TP, LAMENTABLEMENTE NO ALCANCE A IMPLEMENTARLAS
+    public String[] obtenerComestiblesConMenorDescuento(Float porcentajeDescuento){
+        return products.values()
+                .stream()
+                .filter(ItemTienda::itemConDescuento)
+                .filter(item -> porcentajeDescuento < ((ItemTiendaConDescuento)item).totalDiscount())
+                .filter(ItemTienda::itemComestible)
+                .filter(item -> !(item.itemImported()))
+                .sorted(Comparator.comparing(ItemTienda::getItemPriceOfSale))
+                .map(ItemTienda::getName)
+                .map(String::toUpperCase)
+                .toArray(String[]::new);
+    }
+
     @Override
     public String toString() {
         return " ---------- "+

@@ -321,17 +321,24 @@ public class Tienda implements AgregarProductoTienda, VentaProductoTienda {
     }
 
     //OPERACIONES  DE LA PARTE III DEL TP, LAMENTABLEMENTE NO ALCANCE A IMPLEMENTARLAS
-    public String[] obtenerComestiblesConMenorDescuento(Float porcentajeDescuento){
+    public String[] obtenerComestiblesConMenorDescuento(Float porcentajeDescuento){ //% con valor entre 0 y 1
         return products.values()
+                        .stream()
+                        .filter(ItemTienda::itemConDescuento)
+                        .filter(item -> porcentajeDescuento < ((ItemTiendaConDescuento)item).totalDiscount())
+                        .filter(ItemTienda::itemComestible)
+                        .filter(item -> !(item.itemImported()))
+                        .sorted(Comparator.comparing(ItemTienda::getItemPriceOfSale))
+                        .map(ItemTienda::getName)
+                        .map(String::toUpperCase)
+                        .toArray(String[]::new);
+    }
+    public void listarProductosConUtilidadesInferiores(Float porcentaje_utilidad){//La consulta seria asi pero por como esta implementado los items en este proyecto, no aplica los descuentos y restricciones de un item
+        products.values()
                 .stream()
-                .filter(ItemTienda::itemConDescuento)
-                .filter(item -> porcentajeDescuento < ((ItemTiendaConDescuento)item).totalDiscount())
-                .filter(ItemTienda::itemComestible)
-                .filter(item -> !(item.itemImported()))
-                .sorted(Comparator.comparing(ItemTienda::getItemPriceOfSale))
-                .map(ItemTienda::getName)
-                .map(String::toUpperCase)
-                .toArray(String[]::new);
+                .filter(item -> item.getMarginOfEarning() < porcentaje_utilidad)
+                .forEach(item -> System.out.println(item.getIdProduct()+" "+
+                                item.getName()+" "+item.getQuantity()));
     }
 
     @Override
